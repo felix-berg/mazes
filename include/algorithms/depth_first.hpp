@@ -6,10 +6,10 @@
 
 namespace mazes {
 
-struct DepthFirst {
+class DepthFirst {
     /// @return implementation: whether the algorithm should continue
     template <typename D, uint64_t N>
-    static constexpr bool impl(
+    static constexpr bool find_path(
         const DirectedGraph<D, N>& graph,
         PathType <DirectedGraph<D, N>>& path,
         std::vector<bool>& visited,
@@ -26,7 +26,7 @@ struct DepthFirst {
         const Edges auto& edges = graph.edges(from);
         for (uint64_t i = 0; i < edges.size(); i++) {
             const uint64_t e = edges[i];
-            if (impl(graph, path, visited, e, to))
+            if (find_path(graph, path, visited, e, to))
                 return true;
         }
 
@@ -96,13 +96,14 @@ struct DepthFirst {
 public:
     template <typename D, uint64_t N>
     static constexpr std::optional<PathType < DirectedGraph<D, N>>>
+    /// Search and find a path through graph from from to to
+    /// \return found path or std::nullopt if no path was found
     search(const DirectedGraph<D, N>& graph,
-        const uint64_t from,
-        const uint64_t to)
+        const uint64_t from, const uint64_t to)
     {
         std::vector<bool> visited(graph.size());
         PathType <DirectedGraph<D, N>> path;
-        bool success = impl(graph, path, visited, from, to);
+        bool success = find_path(graph, path, visited, from, to);
         if (success) {
             return path;
         } else return {};
@@ -115,8 +116,7 @@ public:
     // stopped.
     static constexpr void search_and_continue(
         const DirectedGraph<D, N>& graph,
-        const uint64_t from,
-        const uint64_t to,
+        const uint64_t from, const uint64_t to,
         OnFindFunc&& on_find)
     {
         PathType<DirectedGraph<D, N>> path;
@@ -130,8 +130,7 @@ public:
     static constexpr void search_and_continue(
         const DirectedGraph<D, N>& graph,
         const uint64_t from, const uint64_t to,
-        OnFindFunc&& on_find
-        )
+        OnFindFunc&& on_find)
     {
         PathType<decltype(graph)> path;
         std::vector<bool> visited(graph.size());

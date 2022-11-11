@@ -3,4 +3,4 @@
 #pragma once
 
 template <typename Graph>
-using PathType = Graph::Path;
+using PathType = std::decay_t<Graph>::Path;

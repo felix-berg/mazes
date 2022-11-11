@@ -11,7 +11,7 @@ constexpr std::vector<PathType<DirectedGraph<D, N>>> find_all_paths(
     const uint64_t from, const uint64_t to)
 {
     std::vector<PathType<DirectedGraph<D, N>>> paths;
-    const auto on_find = [&paths](const auto & new_path) -> bool {
+    const auto on_find = [&paths](const auto & new_path) {
         paths.push_back(new_path);
     };
 

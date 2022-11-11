@@ -86,35 +86,55 @@ struct VisualMazeGraph : fbg::Context {
          c.strokeweight(cellw / 12 + 1);
       }
    }
+   virtual ~VisualMazeGraph() { };
 };
 
 struct VisualPath : fbg::Context {
-   std::vector<fbg::Line> lines;
 
-   VisualPath(fbg::Window & window, const Maze& maze, const MazeGraph& graph, const PathType<MazeGraph>& path)
-   {
-      // fbg::Line::DEFAULT_LINEMODE = fbg::LineMode::SMOOTH;
-      const float cellw { float(window.width()) / float(maze.width) };
-      const float cellh { float(window.height()) / float(maze.height) };
+    std::vector<fbg::Line> lines;
 
-      const Point * prev = nullptr;
-      for (uint64_t i : path) {
-         const Point * p = &graph.node(i);
-         if (prev)
-            lines.push_back({
-               float(prev->x) * cellw + cellw / 2.0f,
-               float(prev->y) * cellh + cellh / 2.0f,
-               float(p->x) * cellw + cellw / 2.0f,
-               float(p->y) * cellh + cellh / 2.0f});
+    VisualPath(fbg::Window & window, const Maze& maze, const MazeGraph& graph, const PathType<MazeGraph>& path)
+    {
+         fbg::Line::DEFAULT_LINEMODE = fbg::LineMode::SMOOTH;
+        const float cellw { float(window.width()) / float(maze.width) };
+        const float cellh { float(window.height()) / float(maze.height) };
 
-         prev = p;
-      }
+        const Point * prev = nullptr;
+        for (uint64_t i : path) {
+            const Point * p = &graph.node(i);
+            if (prev)
+                lines.push_back({
+                                    float(prev->x) * cellw + cellw / 2.0f,
+                                    float(prev->y) * cellh + cellh / 2.0f,
+                                    float(p->x) * cellw + cellw / 2.0f,
+                                    float(p->y) * cellh + cellh / 2.0f
+                                });
 
-      for (auto & l : lines) {
-         l.stroke({0, 0, 255, 255});
-         l.strokeweight(cellw / 4);
-         Context::attach(l);
-      }
+            prev = p;
+        }
+
+        for (auto & l : lines) {
+            l.stroke({0, 0, 255, 255});
+            l.strokeweight(cellw / 4);
+            Context::attach(l);
+        }
+    }
+
+   void hide(uint64_t index) {
+       lines.at(index).stroke({0, 0, 0, 0});
+   }
+
+   void show(uint64_t index) {
+       lines.at(index).stroke({0, 0, 255, 255});
+   }
+
+   void show(uint64_t from, uint64_t to) {
+        for (uint64_t i = 0; i < from; i++)
+            hide(i);
+        for (uint64_t i = from; i < to; i++)
+            show(i);
+        for (uint64_t i = to; i < lines.size(); i++)
+            hide(i);
    }
 
    VisualPath(VisualPath&&) = default;
