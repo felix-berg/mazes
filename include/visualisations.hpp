@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mazegraph.hpp>
+#include <path_type.hpp>
 #include <fbg.hpp>
 
 namespace mazes {
@@ -90,7 +91,7 @@ struct VisualMazeGraph : fbg::Context {
 struct VisualPath : fbg::Context {
    std::vector<fbg::Line> lines;
 
-   VisualPath(fbg::Window & window, const Maze& maze, const MazeGraph& graph, const GraphPath& path)
+   VisualPath(fbg::Window & window, const Maze& maze, const MazeGraph& graph, const PathType<MazeGraph>& path)
    {
       // fbg::Line::DEFAULT_LINEMODE = fbg::LineMode::SMOOTH;
       const float cellw { float(window.width()) / float(maze.width) };

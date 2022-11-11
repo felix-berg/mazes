@@ -5,19 +5,16 @@
 
 #include <chrono>
 
-struct BenchmarkInfo {
-};
-
-
 int main() {
     using namespace mazes;
 
-    Maze m(21, 21, {
+    const Maze m(21, 21, {
         #include "21x21.txt"
     });
 
-    MazeGraph mg = graph_from_maze(m);
-    std::vector<GraphPath> paths = find_all_paths(mg, 0, mg.size() - 1);
+    const MazeGraph mg = graph_from_maze(m);
+    const auto paths
+        = find_all_paths(mg, 0, mg.size() - 1);
 
     fbg::LoopWin win ("Maze solver", 1000, 1000);
 
