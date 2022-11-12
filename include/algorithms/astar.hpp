@@ -48,10 +48,12 @@ public:
          *                    ^ beginidx
          * finished nodes values are constant */
         std::vector<PQElm> pqueue { { from, via_none, DistanceType(), get_distance_to_finish(from) } };
+
         uint64_t beginidx = 0;
         pqueue.reserve(graph.size() / 12 + 1);
 
-        std::vector<bool> visited(graph.size());
+        std::vector<bool> in_queue(graph.size(), 0);
+        in_queue[from] = true;
 
         /* insert element into sorted priority queue (by pathlen)*/
         const auto insert_sorted = [&pqueue, &beginidx](PQElm&& elm) {
@@ -66,20 +68,22 @@ public:
         bool path_found = false;
         while (beginidx < pqueue.size()) { /* while queue is not empty*/
             /* "pop front" (and push to finished) */
-            const PQElm& element = pqueue.at(beginidx);
+            const PQElm element = pqueue.at(beginidx);
             const uint64_t elmidx = beginidx;
             beginidx++;
+
+            in_queue[element.node] = true;
 
             if (element.node == to) {
                 path_found = true;
                 break;
             }
 
-            visited[element.node] = true;
-
             const Edges auto& edges = graph.edges(element.node);
             for (const uint64_t e : edges) {
-                if (visited[e]) continue;
+                assert(e < graph.size());
+                if (in_queue[e]) continue;
+                in_queue[e] = true;
                 const DistanceType elen = get_edge_length(element.node, e);
                 const DistanceType pathlen = element.pathlen + elen;
                 insert_sorted(PQElm(e, elmidx, pathlen, pathlen + get_distance_to_finish(e)));

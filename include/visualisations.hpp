@@ -90,53 +90,90 @@ struct VisualMazeGraph : fbg::Context {
 };
 
 struct VisualPath : fbg::Context {
-
+    std::vector<fbg::Circle> circles;
     std::vector<fbg::Line> lines;
 
-    VisualPath(fbg::Window & window, const Maze& maze, const MazeGraph& graph, const PathType<MazeGraph>& path)
+    VisualPath(fbg::Window& window, const Maze& maze, const MazeGraph& graph, const PathType <MazeGraph>& path, const
+    fbg::Rgba col = { 0, 0, 255, 255 })
     {
-         fbg::Line::DEFAULT_LINEMODE = fbg::LineMode::SMOOTH;
         const float cellw { float(window.width()) / float(maze.width) };
         const float cellh { float(window.height()) / float(maze.height) };
 
-        const Point * prev = nullptr;
-        for (uint64_t i : path) {
-            const Point * p = &graph.node(i);
-            if (prev)
-                lines.push_back({
-                                    float(prev->x) * cellw + cellw / 2.0f,
-                                    float(prev->y) * cellh + cellh / 2.0f,
-                                    float(p->x) * cellw + cellw / 2.0f,
-                                    float(p->y) * cellh + cellh / 2.0f
-                                });
-
-            prev = p;
+        for (auto & step : path) {
+            const Point p = graph.node(step);
+            circles.push_back({
+                p.x * cellw + cellw / 2,
+                p.y * cellh + cellh / 2,
+                cellw / 6.0f + 1
+            });
+            circles.back().noStroke();
+            circles.back().fill(col);
         }
 
-        for (auto & l : lines) {
-            l.stroke({0, 0, 255, 255});
-            l.strokeweight(cellw / 4);
+        for (uint64_t i = 0; i < circles.size() - 1; i++) {
+            lines.push_back({
+                circles[i].pos(),
+                circles[i + 1].pos()
+            });
+            lines.back().strokeweight(cellw / 12.0f + 1);
+            lines.back().stroke(col);
+        }
+
+        for (auto & c : circles)
+            Context::attach(c);
+        for (auto & l : lines)
             Context::attach(l);
-        }
     }
-
-   void hide(uint64_t index) {
-       lines.at(index).stroke({0, 0, 0, 0});
-   }
-
-   void show(uint64_t index) {
-       lines.at(index).stroke({0, 0, 255, 255});
-   }
-
-   void show(uint64_t from, uint64_t to) {
-        for (uint64_t i = 0; i < from; i++)
-            hide(i);
-        for (uint64_t i = from; i < to; i++)
-            show(i);
-        for (uint64_t i = to; i < lines.size(); i++)
-            hide(i);
-   }
-
-   VisualPath(VisualPath&&) = default;
 };
+
+//struct VisualPath : fbg::Context {
+//
+//    std::vector<fbg::Line> lines;
+//
+//    VisualPath(fbg::Window & window, const Maze& maze, const MazeGraph& graph, const PathType<MazeGraph>& path)
+//    {
+//         fbg::Line::DEFAULT_LINEMODE = fbg::LineMode::SMOOTH;
+//        const float cellw { float(window.width()) / float(maze.width) };
+//        const float cellh { float(window.height()) / float(maze.height) };
+//
+//        const Point * prev = nullptr;
+//        for (uint64_t i : path) {
+//            const Point * p = &graph.node(i);
+//            if (prev)
+//                lines.push_back({
+//                                    float(prev->x) * cellw + cellw / 2.0f,
+//                                    float(prev->y) * cellh + cellh / 2.0f,
+//                                    float(p->x) * cellw + cellw / 2.0f,
+//                                    float(p->y) * cellh + cellh / 2.0f
+//                                });
+//
+//            prev = p;
+//        }
+//
+//        for (auto & l : lines) {
+//            l.stroke({0, 0, 255, 255});
+//            l.strokeweight(cellw / 4);
+//            Context::attach(l);
+//        }
+//    }
+//
+//   void hide(uint64_t index) {
+//       lines.at(index).stroke({0, 0, 0, 0});
+//   }
+//
+//   void show(uint64_t index) {
+//       lines.at(index).stroke({0, 0, 255, 255});
+//   }
+//
+//   void show(uint64_t from, uint64_t to) {
+//        for (uint64_t i = 0; i < from; i++)
+//            hide(i);
+//        for (uint64_t i = from; i < to; i++)
+//            show(i);
+//        for (uint64_t i = to; i < lines.size(); i++)
+//            hide(i);
+//   }
+//
+//   VisualPath(VisualPath&&) = default;
+//};
 }

@@ -41,6 +41,7 @@ public:
         EdgeLength&& get_edge_length
         )
     {
+        std::cout << "Running Dijkstra\n";
         using PQElm = PQElement<EdgeLengthType>;
         constexpr uint64_t via_none = UINT64_MAX;
 
@@ -52,7 +53,7 @@ public:
         uint64_t beginidx = 0;
         pqueue.reserve(graph.size() / 12 + 1);
 
-        std::vector<bool> visited(graph.size());
+        std::vector<bool> added(graph.size(), 0);
 
         /* insert element into sorted priority queue (by pathlen)*/
         const auto insert_sorted = [&pqueue, &beginidx](PQElm&& elm) {
@@ -66,7 +67,7 @@ public:
 
         bool path_found = false;
         while (beginidx < pqueue.size()) { /* while queue is not empty*/
-            const PQElm& element = pqueue.at(beginidx);
+            const PQElm element = pqueue.at(beginidx);
             const uint64_t elmidx = beginidx;
             beginidx++;
 
@@ -75,11 +76,11 @@ public:
                 break;
             }
 
-            visited[element.node] = true;
 
             const Edges auto& edges = graph.edges(element.node);
             for (const uint64_t e : edges) {
-                if (visited[e]) continue;
+                if (added[e]) continue;
+                added[e] = true;
                 const EdgeLengthType elen = get_edge_length(element.node, e);
                 const EdgeLengthType pathlen = element.pathlen + elen;
                 insert_sorted(PQElm(e, elmidx, pathlen));
@@ -132,7 +133,8 @@ public:
         /* index indicating no connection */
         constexpr uint64_t via_none = UINT64_MAX;
 
-        std::vector<bool> visited(graph.size(), 0);
+        std::vector<bool> in_queue(graph.size(), 0);
+        in_queue[from] = true;
 
         /* stack of finished priorityqueue elements*/
         std::vector<PQElm> finished;
@@ -155,7 +157,6 @@ public:
 
             finished.push_back(elm);
             const uint64_t elmidx = finished.size() - 1;
-            visited[elm.node] = true;
 
             if (elm.node == to) {
                 /* Found correct node, therefore shortest path. */
@@ -165,7 +166,8 @@ public:
 
             const Edges auto & edges = graph.edges(elm.node);
             for (uint64_t e : edges) {
-                if (visited[e]) continue;
+                if (in_queue[e]) continue;
+                in_queue[e] = true;
 
                 const EdgeLengthType el = get_edge_length(elm.node, e);
                 const EdgeLengthType pathlen = elm.pathlen + el;

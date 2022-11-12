@@ -3,6 +3,7 @@
 
 mazes::MazeGraph mazes::graph_from_maze(const Maze& maze) {
     assert(valid_maze(maze));
+
     MazeGraph graph;
     graph.reserve(maze.size() / 4);
 
@@ -15,6 +16,7 @@ mazes::MazeGraph mazes::graph_from_maze(const Maze& maze) {
         if (maze.path_at(p)) {
             uint64_t idx = graph.add_node(p);
             prev_up_idxs[x] = idx;
+            break;
         }
     }
 
@@ -57,14 +59,15 @@ mazes::MazeGraph mazes::graph_from_maze(const Maze& maze) {
     }
 
     /* Find exit point of maze */
-    const uint32_t bottomy = maze.height - 1;
     for (uint32_t x = 1; x < maze.width - 1; x++) {
-        const Point p = { x, bottomy };
+        const Point p = { x, maze.height - 1 };
         if (maze.path_at(p)) {
             auto idx = graph.add_node(p);
             /* Connects to path above */
-            if (maze.path_at({x, bottomy - 1}))
+            if (maze.path_at({ x, maze.height - 1})) {
                 graph.connect(idx, prev_up_idxs[x]);
+                break;
+            }
         }
     }
 

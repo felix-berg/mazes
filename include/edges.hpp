@@ -27,43 +27,41 @@ struct StaticEdges
         : private std::array<uint64_t, Size> {
     using container = std::array<uint64_t, Size>;
     static constexpr uint64_t nullidx = UINT64_MAX;
-    container::iterator end_;
+    uint64_t sz_;
 
     constexpr StaticEdges()
             : std::array<uint64_t, Size>{},
-              end_{container::begin()} {
+              sz_{0} {
     }
 
     constexpr void add_adjacency(uint64_t n) noexcept {
-        *(end_++) = n; /* "push back" */
+        assert(size() < 4);
+        container::at(sz_++) = n; /* "push back" */
     }
 
     constexpr void remove_adjacency(uint64_t n) noexcept {
-        const auto p = std::find(container::begin(), container::end(), n);
-        assert(p != container::end() && "Edge not found");
+        const auto p = std::find(begin(), end(), n);
+        assert(p != end() && "Edge not found");
 
-        /* remove element by shifting every oher element down */
-        for (auto it = p + 1; it != container::end(); ++it) {
-            *(it - 1) = *it;
-        }
-        container::back() = nullidx;
+        for (auto it = p; it < end() - 1; ++it)
+            *p = *(p + 1);
     }
 
     using container::begin;
 
     constexpr container::iterator end() noexcept {
-        return end_;
+        return container::begin() + sz_;
     }
 
     constexpr container::const_iterator end() const noexcept {
-        return end_;
+        return container::begin() + sz_;
     }
 
     using container::at;
     using container::operator[];
 
     constexpr uint64_t size() const noexcept {
-        return end() - begin();
+        return sz_;
     }
 };
 

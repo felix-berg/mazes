@@ -15,22 +15,19 @@ class DepthFirst {
         std::vector<bool>& visited,
         const uint64_t from, const uint64_t to)
     {
-        if (visited[from]) return false;
-
         path.push_back(from);
-        visited[from] = true;
-
         if (from == to)
             return true;
 
         const Edges auto& edges = graph.edges(from);
         for (uint64_t i = 0; i < edges.size(); i++) {
             const uint64_t e = edges[i];
+            if (visited[e]) continue;
+            visited[e] = true;
             if (find_path(graph, path, visited, e, to))
                 return true;
+            visited[e] = false;
         }
-
-        visited[from] = false;
 
         path.pop_back();
         return false;
@@ -45,22 +42,22 @@ class DepthFirst {
         const uint64_t from, const uint64_t to,
         OnFindFunc&& on_find)
     {
-        if (visited[from]) return;
-
         path.push_back(from);
-        visited[from] = true;
 
         if (from == to) {
             on_find(path);
         } else {
             const auto& edges = graph.edges(from);
             for (uint64_t i = 0; i < edges.size(); i++) {
-                find_all_paths_unstoppable(graph, path, visited, edges[i], to, on_find);
+                const uint64_t e = edges[i];
+                if (visited[e]) continue;
+                visited[e] = true;
+                find_all_paths_unstoppable(graph, path, visited, e, to, on_find);
+                visited[e] = false;
             }
         }
 
         path.pop_back();
-        visited[from] = false;
     }
 
     template <typename D, size_t N,
@@ -102,6 +99,7 @@ public:
         const uint64_t from, const uint64_t to)
     {
         std::vector<bool> visited(graph.size());
+        visited[from] = true;
         PathType <DirectedGraph<D, N>> path;
         bool success = find_path(graph, path, visited, from, to);
         if (success) {
@@ -121,6 +119,7 @@ public:
     {
         PathType<DirectedGraph<D, N>> path;
         std::vector<bool> visited(graph.size());
+        visited[from] = true;
         find_all_paths_stoppable(graph, path, visited, from, to, on_find);
     }
 
@@ -134,6 +133,7 @@ public:
     {
         PathType<decltype(graph)> path;
         std::vector<bool> visited(graph.size());
+        visited[from] = true;
         find_all_paths_unstoppable(graph, path, visited, from, to, on_find);
     }
 };
