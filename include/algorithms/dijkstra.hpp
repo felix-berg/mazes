@@ -18,7 +18,13 @@ class Dijkstra {
         uint64_t node; /* node of graph */
         uint64_t via_elmidx; /* index into finished elements */
         EdgeLengthType pathlen; /* combined pathlength up until node */
+
+        constexpr PQElement() { };
+        constexpr PQElement(uint64_t n, uint64_t v, EdgeLengthType pl)
+            : node { n }, via_elmidx { v }, pathlen { pl } { };
     };
+
+    static constexpr auto always_one = [](uint64_t, uint64_t) -> long { return long(1); };
 
 public:
     template <typename EdgeLengthType = long, typename D, uint64_t N,
@@ -60,7 +66,6 @@ public:
 
         bool path_found = false;
         while (beginidx < pqueue.size()) { /* while queue is not empty*/
-            /* "pop front" (and push to finished) */
             const PQElm& element = pqueue.at(beginidx);
             const uint64_t elmidx = beginidx;
             beginidx++;
@@ -98,6 +103,15 @@ public:
         }
 
         return path;
+    }
+
+    template <typename D, uint64_t N>
+    static constexpr std::optional<PathType<DirectedGraph<D,N>>> search(
+        const DirectedGraph<D, N>& graph,
+        const uint64_t from, const uint64_t to
+        )
+    {
+        return Dijkstra::search<long>(graph, from, to, always_one);
     }
 
     template <typename EdgeLengthType = long, typename D, uint64_t N,
