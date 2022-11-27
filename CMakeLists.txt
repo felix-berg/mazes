@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.24)
 project(mazes)
 
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
 
 # update modules (git submodule update --init --recursive)
 find_package(Git QUIET)
