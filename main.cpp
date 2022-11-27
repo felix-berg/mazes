@@ -12,14 +12,17 @@
 int main() {
     using namespace mazes;
 
-    const Maze maze(21, 21, {
-        #include "21x21.txt"
+    const Maze maze(101, 101, {
+        #include "101x101.txt"
     });
 
-    clock_t gcs = clock(), gce;
+    using namespace std::chrono;
+    // microseconds
+    time_point<high_resolution_clock, duration<double, std::ratio<1, 1000000>>> startTime, endTime;
+    startTime = high_resolution_clock::now();
     const MazeGraph graph = graph_from_maze(maze);
-    gce = clock();
-    std::cout << "Created graph with " << graph.nodes().size() << " nodes in " << gce - gcs << " µs.\n";
+    endTime = high_resolution_clock::now();
+    std::cout << "Created graph with " << graph.nodes().size() << " nodes in " << endTime - startTime << ".\n";
     const uint64_t from = 0, to = graph.size() - 1;
 
     const auto map = [](float x, float fmin, float fmax, float tmin, float tmax) {
@@ -49,26 +52,25 @@ int main() {
         return map(v, 0.0f, maxdiffsz, 0.0f, 1000.0f);
     };
 
-    clock_t start_t, end_t;
-    start_t = clock();
+    startTime = high_resolution_clock::now();
     const auto dpath = Dijkstra::search<float>(graph, from, to, edgelen).value();
-    end_t = clock();
-    std::cout << "Dijkstra took " << end_t - start_t << " µs\n";
+    endTime = high_resolution_clock::now();
+    std::cout << "Dijkstra took " << endTime - startTime << "\n";
 
-    start_t = clock();
+    startTime = high_resolution_clock::now();
     const auto apath = AStar::search<float>(graph, from, to, edgelen, dist).value();
-    end_t = clock();
-    std::cout << "A* took " << end_t - start_t << " µs\n";
+    endTime = high_resolution_clock::now();
+    std::cout << "A* took " << endTime - startTime << "\n";
 
-    start_t = clock();
+    startTime = high_resolution_clock::now();
     const auto dfpath = DepthFirst::search(graph, from, to).value();
-    end_t = clock(),
-    std::cout << "DF took " << end_t - start_t << " µs\n";
+    endTime = high_resolution_clock::now(),
+    std::cout << "DF took " << endTime - startTime << "\n";
 
-    start_t = clock();
+    startTime = high_resolution_clock::now();
     const auto bfpath = BreadthFirst::search(graph, from, to).value();
-    end_t = clock(),
-    std::cout << "BF took " << end_t - start_t << " µs\n";
+    endTime = high_resolution_clock::now(),
+    std::cout << "BF took " << endTime - startTime << "\n";
 
 
     fbg::LoopWin win ("Maze solver", 1200, 1200);
